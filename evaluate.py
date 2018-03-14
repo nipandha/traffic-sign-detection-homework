@@ -23,7 +23,7 @@ parser.add_argument('--outfile', type=str, default='gtsrb_kaggle.csv', metavar='
 args = parser.parse_args()
 
 state_dict = torch.load(args.model)
-model = Net()
+model = Net().cuda()
 model.load_state_dict(state_dict)
 model.eval()
 
@@ -44,12 +44,12 @@ for f in tqdm(os.listdir(test_dir)):
     if 'ppm' in f:
         data = data_transforms(pil_loader(test_dir + '/' + f))
         data = data.view(1, data.size(0), data.size(1), data.size(2))
-        data = Variable(data, volatile=True)
+        data = Variable(data, volatile=True).cuda()
         output = model(data)
         pred = output.data.max(1, keepdim=True)[1]
 
         file_id = f[0:5]
-        output_file.write("%s,%d\n" % (file_id, pred))
+        output_file.write("%s,%d\n" % (file_id, pred[0][0]))
 
 output_file.close()
 
